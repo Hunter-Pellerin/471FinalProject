@@ -109,7 +109,7 @@ int display_oz(int fd, int button_value){
 	uint8_t display_tens, display_ones;
 
 
-	if(value < 10){
+	if(button_value < 10){
 		tens = 0x00;	//getting first digit
 		ones = buffer[0] - '0';	//subtracting the first string item in buffer by the ascii character of 0 which prevents the need for a division by 10
 	    display_tens = 0x00;		//dont needs tens for this case

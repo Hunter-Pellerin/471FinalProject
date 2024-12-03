@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <inttypes.h>
 #include <fcntl.h>	/* open() */
 #include <unistd.h>	/* close() */
 #include <string.h>
@@ -9,25 +9,25 @@
 #include "sys/ioctl.h"
 #include "gpio.h"
 
-int fd, result;
+int fdp, result;
+struct gpiohandle_request req;
 
 void error(){ //Error checking function
 	printf("Error number: %s\n", strerror(errno));//Printing the error number and information from errno
-	close(fd); //closing the file
+	close(fdp); //closing the file
 	exit(1); //exiting the linux gpio
 }
 
 int gpio_init(){
-	fd = gpio_fd;
+	fdp = gpio_fd;
 
-	struct gpiohandle_request req;
 	memset(&req,0,sizeof(struct gpiohandle_request));
 	req.flags = GPIOHANDLE_REQUEST_OUTPUT;
 	req.lines = 1;
 	req.lineoffsets[0] = 17; 				//Offset to specified GPIO pin
 	req.default_values[0] = 0;
 	strcpy(req.consumer_label, "ECE471");
-	result = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req);
+	result = ioctl(fdp, GPIO_GET_LINEHANDLE_IOCTL, &req);
 
 	if(result != 0){	//rv will equal to 0 if the operation is successful
 		error();//if not run error check function
@@ -43,7 +43,7 @@ int pour(int on_off) {
 	struct gpiohandle_data data;
 	data.values[0] = 0; //value to output (0 or 1)
 	result = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data); //IO control asking to request to change lines at the data value
-	if(rv != 0){
+	if(result != 0){
 		error();
 	}
 

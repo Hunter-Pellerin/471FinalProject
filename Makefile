@@ -16,10 +16,10 @@ debounce.o: debounce.c debounce.h
 	$(CC) $(CFLAGS) -c debounce.c
 
 display.o: display.c display.h
-	$(CC) $(CFLAGS) -c buttons.c
+	$(CC) $(CFLAGS) -c display.c
 
 pouring.o: pouring.c pouring.h
-	$(CC) $(CFLAGS) -c buttons.c
+	$(CC) $(CFLAGS) -c pouring.c
 
 # Clean up build artifacts
 clean:

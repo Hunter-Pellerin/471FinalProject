@@ -19,6 +19,11 @@
 #define POUR_GPIO_PIN 19
 #define NUM_READS_DEBOUNCE 3
 #define MAX_BUTTONS 3
+#define MAX_OUNCES 16
+
+#define DOWN_BUTTON 0
+#define UP_BUTTON 1
+#define POUR_BUTTON 2
 
 button_state_t buttons[MAX_BUTTONS];
 button_state_t buttons_prev[MAX_BUTTONS];
@@ -47,7 +52,7 @@ void initGpioInput(int8_t pin, int index)
     if (rv != 0)
     {
         close(fd);
-        handleError("Failed to get line handle");
+        handleError();
     }
 
     // Store the file descriptor
@@ -112,7 +117,7 @@ void handle_button(int idx)
             switch (idx)
             {
             case POUR_BUTTON:
-                pour = !pour;
+                pouring = !pouring;
                 break;
 
             case DOWN_BUTTON:

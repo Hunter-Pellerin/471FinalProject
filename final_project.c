@@ -27,7 +27,7 @@ int main()
         }
         else
         {
-            display_oz(disp_fd);
+            display_oz(disp_fd, ounces_to_pour);
         }
     }
 }

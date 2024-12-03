@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include "linux/gpio.h"
 #include "sys/ioctl.h"
+#include "gpio.h"
 
 int fd, result;
 
@@ -17,7 +18,7 @@ void error(){ //Error checking function
 }
 
 int gpio_init(){
-	fd = open("/dev/gpiochip0", O_RDWR);
+	fd = gpio_fd;
 
 	struct gpiohandle_request req;
 	memset(&req,0,sizeof(struct gpiohandle_request));

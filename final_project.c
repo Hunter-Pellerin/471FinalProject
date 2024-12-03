@@ -9,6 +9,7 @@
 
 int main()
 {
+    open_gpio();
     init_buttons();
     int disp_fd = init_display();
     gpio_init();

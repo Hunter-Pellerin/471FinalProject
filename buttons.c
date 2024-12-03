@@ -60,7 +60,7 @@ void initGpioInput(int8_t pin, int index)
 void init_buttons()
 {
 	// get file descriptor, open file for reading/writing
-	fd = open("/dev/gpiochip0", O_RDWR);
+	fd = gpio_fd;
 
 	// if could not open gpio file for read/write
 	if (-1 == fd)

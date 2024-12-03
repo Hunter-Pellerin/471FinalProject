@@ -9,7 +9,7 @@
 
 //error checking function that will close file and exit if there is an error
 void errorchecking(int fd){
-	printf("Error in i2c operation %d\n", errno);
+	printf("Error %d\n", errno);
 	close(fd);
 	exit(1);
 }

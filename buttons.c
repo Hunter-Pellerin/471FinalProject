@@ -14,8 +14,8 @@
 
 #include "debounce.h"
 
-#define DOWN_GPIO_PIN 17
-#define UP_GPIO_PIN 18
+#define DOWN_GPIO_PIN 26
+#define UP_GPIO_PIN 13
 #define POUR_GPIO_PIN 19
 #define NUM_READS_DEBOUNCE 3
 #define MAX_BUTTONS 3
@@ -81,7 +81,7 @@ void init_buttons()
     buttons_prev[POUR_BUTTON] = buttons[POUR_BUTTON];
 }
 
-void get_button(int idx)
+void handle_button(int idx)
 {
     uint8_t changeCount = 0;
 
@@ -107,8 +107,33 @@ void get_button(int idx)
     
     if (changeCount == NUM_READS_DEBOUNCE)
     {
-        buttons_prev[idx] = buttons[idx];
+        if (buttons[idx] == 1)
+        {
+            switch (idx)
+            {
+            case POUR_BUTTON:
+                pour = !pour;
+                break;
+
+            case DOWN_BUTTON:
+                if (ounces_to_pour > 0)
+                {
+                    ounces_to_pour--;
+                }
+                break;
+
+            case UP_BUTTON:
+                if (ounces_to_pour < MAX_OUNCES)
+                {
+                    ounces_to_pour++;
+                }
+                else
+                {
+                    ounces_to_pour = MAX_OUNCES;
+                }
+            }
+        }
     }
 
-    return buttons_prev[idx];
+    buttons_prev[idx] = buttons[idx];
 }

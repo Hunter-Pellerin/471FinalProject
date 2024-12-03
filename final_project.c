@@ -1,5 +1,7 @@
 #include "buttons.h"
 #include "debounce.h"
+#include "display.h"
+#include "pouring.h"
 
 #define DOWN_BUTTON 0
 #define UP_BUTTON 1
@@ -8,11 +10,24 @@
 int main()
 {
     init_buttons();
+    int disp_fd = init_display();
+    gpio_init();
 
     while (1)
     {
-        button_state_t down_button = get_button(DOWN_BUTTON);
-        button_state_t up_button = get_button(UP_BUTTON);
-        button_state_t pour_button = get_button(POUR_BUTTON);
+        handle_button(DOWN_BUTTON);
+        handle_button(UP_BUTTON);
+        handle_button(POUR_BUTTON);
+
+        pour(pouring);
+
+        if (pouring)
+        {
+            display_pouring(disp_fd);
+        }
+        else
+        {
+            display_oz(disp_fd);
+        }
     }
 }

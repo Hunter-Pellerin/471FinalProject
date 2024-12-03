@@ -16,8 +16,7 @@ void error(){ //Error checking function
 	exit(1); //exiting the linux gpio
 }
 
-int gpio_init(fd){
-
+int gpio_init(){
 	fd = open("/dev/gpiochip0", O_RDWR);
 
 	struct gpiohandle_request req;
@@ -36,7 +35,7 @@ int gpio_init(fd){
 	return 0;
 }
 
-int pour(int on_off, fd){
+int pour(int on_off) {
 
 	static uint8_t  previous_state;
 

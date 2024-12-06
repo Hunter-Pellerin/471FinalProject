@@ -1,6 +1,10 @@
+#ifdef DEBOUNCE_H
+#define DEBOUNCE_H
+
 #include "linux/gpio.h"
 #include <stdint.h>
 
+// Button states
 typedef enum
 {
 	BUTTON_RELEASED,
@@ -9,3 +13,5 @@ typedef enum
 
 void handleError(void);
 int8_t read_button(int fd);
+
+#endif

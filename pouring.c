@@ -13,15 +13,19 @@
 int fdp, result;
 struct gpiohandle_request req;
 
-void error(){ //Error checking function
+//Error checking function
+void error(){
 	printf("Error number: %s\n", strerror(errno));//Printing the error number and information from errno
 	close(fdp); //closing the file
 	exit(1); //exiting the linux gpio
 }
 
+// Initialize the gpio output for the relay
 int gpio_init(){
+	// Use gpio file from gpio.h
 	fdp = gpio_fd;
 
+	// Initialize gpio outputs for pump relay
 	memset(&req,0,sizeof(struct gpiohandle_request));
 	req.flags = GPIOHANDLE_REQUEST_OUTPUT;
 	req.lines = 1;
@@ -37,6 +41,7 @@ int gpio_init(){
 	return 0;
 }
 
+// Toggles the relay on for 250ms then turn off on an input parameter state change
 int pour(pour_state_t on_off) {
 	static pour_state_t previous_state;
 
@@ -63,6 +68,7 @@ int pour(pour_state_t on_off) {
 		}	
 	}
 
+	// Set the previous state so we know to toggle to the opposite state in the future
 	previous_state = on_off;	
 	return 0;
 

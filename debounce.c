@@ -19,19 +19,19 @@ void handleError()
 
 int8_t read_button(int fd)
 {
-	// cast void pointer for d
+	// Declare data struct and init to zeros before getting gpio data
 	struct gpiohandle_data data;
 
 	memset(&data, 0, sizeof(data));
 	int8_t rv = ioctl(fd, GPIOHANDLE_GET_LINE_VALUES_IOCTL, &data);
 
-	// check the return value of ioctl
+	// Check the return value of ioctl
 	if (0 != rv)
 	{
 		handleError();
 		return 1;
 	}
 
-	/* the read value is in data.values[0] */
+	// The read value is in data.values[0]
 	return data.values[0];
 }

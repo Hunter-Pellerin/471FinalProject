@@ -7,14 +7,14 @@
 #include <linux/i2c-dev.h>
 #include <stdint.h>
 
-//error checking function that will close file and exit if there is an error
+// Error checking function that will close file and exit if there is an error
 void errorchecking(int fd){
 	printf("Error %d\n", errno);
 	close(fd);
 	exit(1);
 }
 
-
+// Setup the 7-segment i2C display
 int init_display(void){
 
 	unsigned char buffer[17];
@@ -56,6 +56,7 @@ int init_display(void){
 		errorchecking(fd);
 	}
 
+	// return file descriptor later used for writing values
 	return fd;
 }
 
@@ -108,13 +109,14 @@ int display_oz(int fd, int button_value){
 	uint8_t tens, ones;
 	uint8_t display_tens, display_ones;
 
-
+	// ones digit can display values less than 10
 	if(button_value < 10){
 		tens = 0x00;	//getting first digit
 		ones = buffer[0] - '0';	//subtracting the first string item in buffer by the ascii character of 0 which prevents the need for a division by 10
 	    display_tens = 0x00;		//dont needs tens for this case
 	}
 
+	// need to use both digits to display values larger than 10
 	else{
 		tens = buffer[0] - '0';
 		ones = buffer[1] - '0';
@@ -133,6 +135,7 @@ int display_oz(int fd, int button_value){
 	buffer[8] = 0x00;
 	buffer[9] = 0x5B;	//display Z (technically 2) for Oz (ABGED)
 
+	// write the buffer to the display
 	result = write(fd, buffer, 17);
 	if(result < 0){ //error check
 		errorchecking(fd);
@@ -140,6 +143,7 @@ int display_oz(int fd, int button_value){
     return 0;
 }
 
+// Display the word "Pour" on the display
 int display_pouring(int fd){
 
     int result;
@@ -163,7 +167,7 @@ int display_pouring(int fd){
     return 0;
 }
 
-/*Shutdown the display by closing the file and exiting*/
+// Shutdown the display by closing the file and exiting
 int shutdown_display(int fd) {
 	close(fd);
 	exit(1);

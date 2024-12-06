@@ -22,10 +22,7 @@
 #define MAX_BUTTONS 3
 #define MAX_OUNCES 16
 
-#define DOWN_BUTTON 0
-#define UP_BUTTON 1
-#define POUR_BUTTON 2
-
+// States for each button corresponds to button IDs
 button_state_t buttons[MAX_BUTTONS];
 button_state_t buttons_prev[MAX_BUTTONS];
 
@@ -33,13 +30,15 @@ button_state_t buttons_prev[MAX_BUTTONS];
 int gpio_fdb[MAX_BUTTONS];
 int fd;
 
+// Store ounces_to_pour and whether we should pour or not
+// These are declared extern in buttons.h to be used by the display and relay
 uint8_t ounces_to_pour = 8;
-uint8_t pouring = 0;
+pour_state_t pouring = 0;
 
 // Initialize a GPIO pin as input
 void initGpioInput(int8_t pin, int index)
 {
-    // setup gpio request handler struct for button
+    // Setup gpio request handler struct for button
     struct gpiohandle_request req;
     int rv;
 
@@ -54,33 +53,30 @@ void initGpioInput(int8_t pin, int index)
     rv = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req);
     if (rv != 0)
     {
-        //close(fd);
         handleError();
     }
 
     // Store the file descriptor
     gpio_fdb[index] = req.fd;
-
-    // Close the chip file descriptor (we only need req.fd for later use)
-    //close(fd);
 }
 
 void init_buttons()
 {
-	// get file descriptor, open file for reading/writing
+	// Get file descriptor, open file for reading/writing
 	fd = gpio_fd;
 
-	// if could not open gpio file for read/write
+	// If could not open gpio file for read/write
 	if (-1 == fd)
 	{
 		handleError();
 	}
 
-	// initialize button inputs
+	// Initialize button inputs
 	initGpioInput(DOWN_GPIO_PIN, DOWN_BUTTON);
     initGpioInput(UP_GPIO_PIN, UP_BUTTON);
     initGpioInput(POUR_GPIO_PIN, POUR_BUTTON);
 
+    // Set the initial button states to released
     buttons[DOWN_BUTTON] = BUTTON_RELEASED;
     buttons[UP_BUTTON] = BUTTON_RELEASED;
     buttons[POUR_BUTTON] = BUTTON_RELEASED;
@@ -91,11 +87,13 @@ void init_buttons()
 
 void handle_button(int idx)
 {
+    // Counter used to count the number of consistent state reads for debouncing
     uint8_t stableCount = 0;
 
     // Read the state multiple times before asserting the state was changed for debouncing
     for (int i = 0; i < NUM_READS_DEBOUNCE; i++)
     {
+        // Read button at index and store its state
         buttons[idx] = (button_state_t)read_button(gpio_fdb[idx]);
 
         // Compare the state with the previous state
@@ -117,15 +115,18 @@ void handle_button(int idx)
     // If stable state detected, process it
     if (stableCount == NUM_READS_DEBOUNCE)
     {
+        // If button is pressed, and previously released, need to take action
         if (buttons[idx] == BUTTON_PRESSED && buttons_prev[idx] == BUTTON_RELEASED)
         {
             // Only execute actions on state change from released to pressed
             switch (idx)
             {
+            // If pour button was pressed, change pouring state
             case POUR_BUTTON:
                 pouring = !pouring;
                 break;
 
+            // If down button was pressed, decrement ounces until it reaches 0
             case DOWN_BUTTON:
                 if (ounces_to_pour > 0)
                 {
@@ -133,6 +134,7 @@ void handle_button(int idx)
                 }
                 break;
 
+            // If up button was pressed, increment ounces until it reaches the max
             case UP_BUTTON:
                 if (ounces_to_pour < MAX_OUNCES)
                 {
@@ -147,6 +149,6 @@ void handle_button(int idx)
         }
     }
 
-    // Update the previous button state for the next read
+    // Update the previous button state for detecting the next state change
     buttons_prev[idx] = buttons[idx];
 }

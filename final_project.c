@@ -2,6 +2,8 @@
 #include "debounce.h"
 #include "display.h"
 #include "pouring.h"
+#include "gpio.h"
+#include <stdio.h>
 
 #define DOWN_BUTTON 0
 #define UP_BUTTON 1

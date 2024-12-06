@@ -1,8 +1,8 @@
 #include <inttypes.h>
 
-static uint8_t ounces_to_pour = 8;
+extern uint8_t ounces_to_pour;
 
-static uint8_t pouring = 0;
+extern uint8_t pouring;
 
 void init_buttons();
 int8_t read_button(int idx);

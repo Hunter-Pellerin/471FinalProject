@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include "gpio.h"
 
+int gpio_fd = -1;
+
 void open_gpio()
 {
     gpio_fd = open("/dev/gpiochip0", O_RDWR); // Open for both read and write

@@ -8,6 +8,7 @@
 #include "linux/gpio.h"
 #include "sys/ioctl.h"
 #include "gpio.h"
+#include "pouring.h"
 
 int fdp, result;
 struct gpiohandle_request req;
@@ -36,19 +37,18 @@ int gpio_init(){
 	return 0;
 }
 
-int pour(int on_off) {
-
-	static uint8_t  previous_state;
+int pour(pour_state_t on_off) {
+	static pour_state_t previous_state;
 
 	struct gpiohandle_data data;
-	data.values[0] = 0; //value to output (0 or 1)
+	data.values[0] = NOT_POURING; //value to output (0 or 1)
 	result = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data); //IO control asking to request to change lines at the data value
 	if(result != 0){
 		error();
 	}
 
 	if(previous_state != on_off){
-		data.values[0] = on_off; //data values to 1 to turn on LED
+		data.values[0] = POURING; //data values to 1 to turn on LED
 		result = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
 		if(result != 0){	//checking if rv is equal to zero again
 			error();
@@ -56,7 +56,7 @@ int pour(int on_off) {
 
 		usleep(250000);
 
-		data.values[0] = 0;
+		data.values[0] = NOT_POURING;
 		result = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
 		if(result != 0){	//checking if rv is equal to zero again
 			error();

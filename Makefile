@@ -22,7 +22,7 @@ pouring.o: pouring.c pouring.h
 	$(CC) $(CFLAGS) -c pouring.c
 
 gpio.o: gpio.c gpio.h
-	$(CC) $(CFLAGS) -c buttons.c
+	$(CC) $(CFLAGS) -c gpio.c
 
 # Clean up build artifacts
 clean:

@@ -13,6 +13,7 @@
 #include <sys/time.h>
 
 #include "debounce.h"
+#include "gpio.h"
 
 #define DOWN_GPIO_PIN 26
 #define UP_GPIO_PIN 13
@@ -29,9 +30,11 @@ button_state_t buttons[MAX_BUTTONS];
 button_state_t buttons_prev[MAX_BUTTONS];
 
 // File descriptor array for GPIO lines
-int gpio_fd[MAX_BUTTONS];
-
+int gpio_fdb[MAX_BUTTONS];
 int fd;
+
+uint8_t ounces_to_pour = 8;
+uint8_t pouring = 0;
 
 // Initialize a GPIO pin as input
 void initGpioInput(int8_t pin, int index)
@@ -51,15 +54,15 @@ void initGpioInput(int8_t pin, int index)
     rv = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req);
     if (rv != 0)
     {
-        close(fd);
+        //close(fd);
         handleError();
     }
 
     // Store the file descriptor
-    gpio_fd[index] = req.fd;
+    gpio_fdb[index] = req.fd;
 
     // Close the chip file descriptor (we only need req.fd for later use)
-    close(fd);
+    //close(fd);
 }
 
 void init_buttons()
@@ -88,32 +91,35 @@ void init_buttons()
 
 void handle_button(int idx)
 {
-    uint8_t changeCount = 0;
+    uint8_t stableCount = 0;
 
-    // read the state 3 times before claiming the state was changed for debouncing
-    for (int i=0; i < NUM_READS_DEBOUNCE; i++)
+    // Read the state multiple times before asserting the state was changed for debouncing
+    for (int i = 0; i < NUM_READS_DEBOUNCE; i++)
     {
-        buttons[idx] = (button_state_t)read_button(gpio_fd[0]);
+        buttons[idx] = (button_state_t)read_button(gpio_fdb[idx]);
 
+        // Compare the state with the previous state
         if (buttons_prev[idx] != buttons[idx])
         {
-            changeCount++;
+            stableCount++;
         }
         else
         {
-            // wait for 1ms before trying again
+            // State remains unchanged, break early to debounce
             usleep(1000);
             break;
         }
 
-        // wait for 5ms each cycle
+        // Wait for 5ms between checks
         usleep(5000);
     }
-    
-    if (changeCount == NUM_READS_DEBOUNCE)
+
+    // If stable state detected, process it
+    if (stableCount == NUM_READS_DEBOUNCE)
     {
-        if (buttons[idx] == 1)
+        if (buttons[idx] == BUTTON_PRESSED && buttons_prev[idx] == BUTTON_RELEASED)
         {
+            // Only execute actions on state change from released to pressed
             switch (idx)
             {
             case POUR_BUTTON:
@@ -136,9 +142,11 @@ void handle_button(int idx)
                 {
                     ounces_to_pour = MAX_OUNCES;
                 }
+                break;
             }
         }
     }
 
+    // Update the previous button state for the next read
     buttons_prev[idx] = buttons[idx];
 }

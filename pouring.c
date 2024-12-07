@@ -7,8 +7,12 @@
 #include <stdlib.h>
 #include "linux/gpio.h"
 #include "sys/ioctl.h"
+#include <sys/time.h>
 #include "gpio.h"
 #include "pouring.h"
+#include "buttons.h"
+
+const double OZ_TO_SEC = 37.f/32.f;
 
 int fdp, result;
 struct gpiohandle_request req;
@@ -43,33 +47,58 @@ int gpio_init(){
 
 // Toggles the relay on for 250ms then turn off on an input parameter state change
 int pour(pour_state_t on_off) {
-	static pour_state_t previous_state;
+    static pour_state_t previous_state = NOT_POURING;
+    static double secs_to_pour = 0;
+    static struct timeval last_time;
 
-	struct gpiohandle_data data;
-	data.values[0] = NOT_POURING; //value to output (0 or 1)
-	result = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data); //IO control asking to request to change lines at the data value
-	if(result != 0){
-		error();
-	}
+    struct timeval current_time;
+    double time_passed;
+    struct gpiohandle_data data;
+    int result;
 
-	if(previous_state != on_off){
-		data.values[0] = POURING; //data values to 1 to turn on LED
-		result = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
-		if(result != 0){	//checking if rv is equal to zero again
+    data.values[0] = NOT_POURING;
+
+	// If previous pouring state does not match desired state, need to toggle pouring relay
+    if (previous_state != on_off) {
+        // If pouring, calculate seconds to pour based on ounce selection
+        if (on_off == POURING) {
+            secs_to_pour = ounces_to_pour * OZ_TO_SEC;
+            gettimeofday(&last_time, NULL); // Initialize last_time
+        }
+
+        data.values[0] = POURING;
+        result = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
+        if (result != 0){ // check result to see if gpio read succeeded
 			error();
 		}
 
-		usleep(250000);
+        usleep(250000); // 250 ms delay to allow pump to turn on, mimics a button press
 
-		data.values[0] = NOT_POURING;
-		result = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
-		if(result != 0){	//checking if rv is equal to zero again
+        data.values[0] = NOT_POURING;
+        result = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
+        if (result != 0){ // check result to see if gpio read succeeded
 			error();
-		}	
-	}
+		}
 
-	// Set the previous state so we know to toggle to the opposite state in the future
-	previous_state = on_off;	
-	return 0;
+        previous_state = on_off;
+    }
 
+	//
+    if (on_off == POURING) {
+        gettimeofday(&current_time, NULL);
+        time_passed = (current_time.tv_sec - last_time.tv_sec) +
+                      (current_time.tv_usec - last_time.tv_usec) / 1e6;
+        last_time = current_time; // Update last_time to current_time
+
+        secs_to_pour -= time_passed;
+        if (secs_to_pour <= 0) {
+            secs_to_pour = 0;
+            pouring = NOT_POURING; // Stop pouring
+        }
+
+        printf("secs_to_pour: %lf\n", secs_to_pour);
+    }
+
+    return 0;
 }
+

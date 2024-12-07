@@ -1,4 +1,4 @@
-#ifdef POURING_H
+#ifndef POURING_H
 #define POURING_H
 
 // Pour states

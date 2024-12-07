@@ -1,4 +1,4 @@
-#ifdef DEBOUNCE_H
+#ifndef DEBOUNCE_H
 #define DEBOUNCE_H
 
 #include "linux/gpio.h"

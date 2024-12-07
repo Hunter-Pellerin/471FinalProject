@@ -1,4 +1,4 @@
-#ifdef BUTTONS_H
+#ifndef BUTTONS_H
 #define BUTTONS_H
 
 #include <inttypes.h>

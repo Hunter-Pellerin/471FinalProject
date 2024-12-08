@@ -2,6 +2,10 @@
 
 # Name of the project executable
 EXECUTABLE="./final_project"
+PROJECT_DIR="$HOME/471FinalProject"
+
+# Go to project directory
+cd $PROJECT_DIR
 
 # Check if the executable exists
 if [ ! -f "$EXECUTABLE" ]; then

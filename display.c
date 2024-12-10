@@ -125,15 +125,15 @@ int display_oz(int fd, int button_value){
 		display_ones = seg_numbers(ones);
 
 	buffer[0] = 0x00;
-	buffer[1] = display_tens;   //display the tens
+	buffer[1] = 0x3F;   //display the O (ABCDEF)
 	buffer[2] = 0x00;
-	buffer[3] = display_ones;   //display the ones 
+	buffer[3] = 0x5B;   //display the Z (ABGED)
 	buffer[4] = 0x00;
-	buffer[5] = 0x00;   //middle colon(off)
+	buffer[5] = 0x02;   //middle colon(on)
 	buffer[6] = 0x00;
-	buffer[7] = 0x3F;	//display O for Oz (ABCDEF)
+	buffer[7] = display_tens;	//display tens
 	buffer[8] = 0x00;
-	buffer[9] = 0x5B;	//display Z (technically 2) for Oz (ABGED)
+	buffer[9] = display_ones;	//display ones
 
 	// write the buffer to the display
 	result = write(fd, buffer, 17);
@@ -149,16 +149,16 @@ int display_pouring(int fd){
     int result;
     char buffer[17];
 
-    buffer[0] = 0x00;
-	buffer[1] = 0x73;   //display P for POUr 
+   	buffer[0] = 0x00;
+	buffer[1] = 0x73;   //display P for Pour
 	buffer[2] = 0x00;
-	buffer[3] = 0x3F;   //display O for POUr
+	buffer[3] = 0x5C;   //display o for Pour
 	buffer[4] = 0x00;
 	buffer[5] = 0x00;   //middle colon(off)
 	buffer[6] = 0x00;
-	buffer[7] = 0x3E;	//display U for POUr
+	buffer[7] = 0x1C;	//display u for Pour
 	buffer[8] = 0x00;
-	buffer[9] = 0x50;	//display r for POUr
+	buffer[9] = 0x50;	//display r for Pour
 
 	result = write(fd, buffer, 17);
 	if(result < 0){ //error check

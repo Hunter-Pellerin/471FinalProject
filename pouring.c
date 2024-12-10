@@ -96,7 +96,7 @@ int pour(pour_state_t on_off) {
             pouring = NOT_POURING; // Stop pouring
         }
 
-        printf("secs_to_pour: %lf\n", secs_to_pour);
+
     }
 
     return 0;

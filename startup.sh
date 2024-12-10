@@ -2,7 +2,7 @@
 
 # Name of the project executable
 EXECUTABLE="./final_project"
-PROJECT_DIR="$HOME/471FinalProject"
+PROJECT_DIR="/home/pi/471FinalProject"
 
 # Go to project directory
 cd $PROJECT_DIR
